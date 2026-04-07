@@ -96,8 +96,8 @@ export default {
       fuel: 100,
       
       // Game constants
-      gravity: 0.05,
-      thrustPower: 0.15,
+      gravity: 0.04,
+      thrustPower: 0.18,
       rotationSpeed: 0.015,
       friction: 0.999,
       angularFriction: 0.98,
@@ -333,11 +333,9 @@ export default {
     },
     
     checkLanding() {
-      // Check if touching ground level
-      if (this.y >= this.platformY - 20) {
-        // Check if on platform
+      if (this.gameState !== 'playing') return
+      if (this.y + 10 >= this.platformY) {
         const onPlatform = this.x >= this.platformX && this.x <= this.platformX + this.platformWidth
-        
         if (!onPlatform) {
           this.gameState = 'lost'
           this.crashReason = 'Missed the landing platform!'
@@ -345,42 +343,29 @@ export default {
           this.stopThrustSound()
           return
         }
-        
-        // Normalize angle to -180 to 180
         let normalizedAngle = this.angle % (Math.PI * 2)
         if (normalizedAngle > Math.PI) normalizedAngle -= Math.PI * 2
         if (normalizedAngle < -Math.PI) normalizedAngle += Math.PI * 2
         const angleDegrees = Math.abs(normalizedAngle * 180 / Math.PI)
-        
-        // Check win conditions
         const verticalSpeed = Math.abs(this.vy)
-        const isUpright = angleDegrees < 15
-        
-        if (verticalSpeed < 2.0 && isUpright) {
-          // Success! Pick random compliment
+        const horizontalSpeed = Math.abs(this.vx)
+        const isUpright = angleDegrees < 20
+        if (verticalSpeed < 3.5 && horizontalSpeed < 2.5 && isUpright) {
           this.gameState = 'won'
           this.winMessage = WIN_COMPLIMENTS[Math.floor(Math.random() * WIN_COMPLIMENTS.length)]
           this.playLandingSound(true)
           this.stopThrustSound()
           this.stopBackgroundMusic()
         } else {
-          // Crash
           this.gameState = 'lost'
           this.playLandingSound(false)
           this.stopThrustSound()
-          if (verticalSpeed >= 2.0) {
-            this.crashReason = `Too fast! Vertical speed: ${verticalSpeed.toFixed(1)} (max: 2.0)`
-          } else if (!isUpright) {
-            this.crashReason = `Wrong angle! Angle: ${angleDegrees.toFixed(0)}° (max: 15°)`
-          }
+          if (verticalSpeed >= 3.5) this.crashReason = `Too fast! Vertical: ${verticalSpeed.toFixed(1)} (max: 3.5)`
+          else if (horizontalSpeed >= 2.5) this.crashReason = `Too much drift! Horizontal: ${horizontalSpeed.toFixed(1)} (max: 2.5)`
+          else if (!isUpright) this.crashReason = `Tilted too much! ${angleDegrees.toFixed(0)}° (max: 20°)`
         }
       }
-      
-      // Check ceiling
-      if (this.y < 0) {
-        this.y = 0
-        this.vy = 0
-      }
+      if (this.y < 0) { this.y = 0; this.vy = 0 }
     },
     
     draw() {
@@ -603,5 +588,19 @@ canvas {
 
 .key-hint::before {
   content: '⌨️ ';
+}
+</style>
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0a0a20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: white;
+  font-family: 'Courier New', monospace;
 }
 </style>
