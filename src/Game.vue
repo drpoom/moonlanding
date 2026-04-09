@@ -161,21 +161,21 @@ export default {
   
   methods: {
     initAudio() {
-      this.audio.background = new Audio(AUDIO_ASSETS.background)
-      this.audio.background.loop = true
-      this.audio.background.volume = 0.3
-      
-      this.audio.thrust = new Audio(AUDIO_ASSETS.thrust)
-      this.audio.thrust.loop = true
-      this.audio.thrust.volume = 0.4
-      
-      this.audio.landingSoft = new Audio(AUDIO_ASSETS.landingSoft)
-      this.audio.landingSoft.volume = 0.5
-      
-      this.audio.landingCrash = new Audio(AUDIO_ASSETS.landingCrash)
-      this.audio.landingCrash.volume = 0.6
-      
-      this.audio.initialized = true
+      if (this.audio.initialized) return
+      try {
+        this.audio.background = new Audio(AUDIO_ASSETS.background)
+        this.audio.background.loop = true
+        this.audio.background.volume = 0.3
+        this.audio.thrust = new Audio(AUDIO_ASSETS.thrust)
+        this.audio.thrust.loop = true
+        this.audio.thrust.volume = 0.4
+        this.audio.landingSoft = new Audio(AUDIO_ASSETS.landingSoft)
+        this.audio.landingSoft.volume = 0.5
+        this.audio.landingCrash = new Audio(AUDIO_ASSETS.landingCrash)
+        this.audio.landingCrash.volume = 0.6
+        this.audio.initialized = true
+        console.log('Audio initialized successfully')
+      } catch (e) { console.error('Audio init failed:', e) }
     },
     
     cleanupAudio() {
@@ -267,6 +267,7 @@ export default {
     },
     
     startGame() {
+      this.initAudio()
       this.startBackgroundMusic()
       this.gameState = 'playing'
       this.resetPhysics()
